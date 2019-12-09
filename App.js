@@ -1,18 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { ScreenOrientation } from "expo";
 import { StyleSheet, Text, View } from "react-native";
+import { Audio } from "expo-av";
 import sources from "./audio";
 
-const sharps = [1, 3, 6, 8, 10];
+const sharps = [1, 3, 6, 8, 10, 13, 15, 18, 20, 22];
 const keys = [...Array(sources.length).keys()].filter(k => !sharps.includes(k));
 const ogColors = [...Array(sources.length).keys()].map(a =>
 	sharps.includes(a) ? "black" : "white"
 );
 
 const KEY_HEIGHT = 160;
-const KEY_WIDTH = 48;
+const KEY_WIDTH = 42;
 const SHARP_HEIGHT = 100;
-const SHARP_WIDTH = 32;
+const SHARP_WIDTH = 28;
+
+const sounds = [];
+async function playSound(key) {
+	const { sound } = await Audio.Sound.create(sources[key], {
+		shouldPlay: true,
+		playsInSilentModeIOS: true
+	});
+	sounds[key] = sound;
+}
 
 export default function App() {
 	const [colors, setColors] = useState(ogColors);
@@ -39,6 +49,9 @@ export default function App() {
 					<View
 						onTouchStart={() => {
 							setColors(colors.map((c, i) => (i == key ? "#dadada" : c)));
+							setTimeout(() => {
+								playSound(key);
+							}, 1);
 						}}
 						onTouchEnd={() => {
 							setColors(ogColors);
@@ -63,6 +76,9 @@ export default function App() {
 						<View
 							onTouchStart={() => {
 								setColors(colors.map((c, i) => (i == key ? "#4e4e4e" : c)));
+								setTimeout(() => {
+									playSound(key);
+								}, 1);
 							}}
 							onTouchEnd={() => {
 								setColors(ogColors);

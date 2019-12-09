@@ -1,5 +1,4 @@
 export default [
-	require("./0.mp3"),
 	require("./1.mp3"),
 	require("./2.mp3"),
 	require("./3.mp3"),
@@ -11,4 +10,18 @@ export default [
 	require("./9.mp3"),
 	require("./10.mp3"),
 	require("./11.mp3"),
+	require("./12.mp3"),
+	require("./13.mp3"),
+	require("./14.mp3"),
+	require("./15.mp3"),
+	require("./16.mp3"),
+	require("./17.mp3"),
+	require("./18.mp3"),
+	require("./19.mp3"),
+	require("./20.mp3"),
+	require("./21.mp3"),
+	require("./22.mp3"),
+	require("./23.mp3"),
+	require("./24.mp3")
+	// require("./25.mp3")
 ];
