@@ -1,30 +1,47 @@
 import React, { useState, useEffect } from "react";
 import { ScreenOrientation } from "expo";
-import { StyleSheet, Text, View } from "react-native";
+import {
+	StyleSheet,
+	ImageBackground,
+	TouchableOpacity,
+	View,
+	Image
+} from "react-native";
 import { Audio } from "expo-av";
-import sources from "./audio";
+import sources from "./assets/audio";
+import { twinkle, bells } from "./songs";
 
-const sharps = [1, 3, 6, 8, 10, 13, 15, 18, 20, 22];
+const sharps = [
+	1,
+	3,
+	6,
+	8,
+	10
+	// 13, 15, 18, 20, 22
+];
 const keys = [...Array(sources.length).keys()].filter(k => !sharps.includes(k));
 const ogColors = [...Array(sources.length).keys()].map(a =>
 	sharps.includes(a) ? "black" : "white"
 );
 
-const KEY_HEIGHT = 160;
-const KEY_WIDTH = 42;
-const SHARP_HEIGHT = 100;
-const SHARP_WIDTH = 28;
+const KEY_HEIGHT = 180;
+const KEY_WIDTH = 62;
+const SHARP_HEIGHT = 120;
+const SHARP_WIDTH = 38;
 
-const sounds = [];
 async function playSound(key) {
-	const { sound } = await Audio.Sound.create(sources[key], {
+	const { sound } = await Audio.Sound.createAsync(sources[key], {
 		shouldPlay: true,
 		playsInSilentModeIOS: true
 	});
-	sounds[key] = sound;
 }
 
+const sleep = ms => new Promise(res => setTimeout(res, ms));
+
+let playerId = 0;
+
 export default function App() {
+	const [song, setSong] = useState(null);
 	const [colors, setColors] = useState(ogColors);
 
 	useEffect(() => {
@@ -33,8 +50,49 @@ export default function App() {
 		);
 	}, []);
 
+	const playKey = key => {
+		playerId = 0;
+		setSong(null);
+		setColors(colors.map((c, i) => (i == key ? "#dadada" : c)));
+		setTimeout(() => {
+			playSound(key);
+		}, 1);
+	};
+
+	const playSharp = key => {
+		setColors(colors.map((c, i) => (i == key ? "#4e4e4e" : c)));
+		setTimeout(() => {
+			playSound(key);
+		}, 1);
+	};
+
+	async function playSong(song) {
+		const currentId = Date.now();
+		playerId = currentId;
+		for (let i = 0; i < song.length; i++) {
+			const key = song[i][0];
+			const delay = song[i][1] * 100;
+			if (playerId == currentId) {
+				playSound(key);
+				setColors(colors.map((c, j) => (j == key ? "#dadada" : ogColors[j])));
+				await sleep(delay);
+				setColors(ogColors);
+				await sleep(10);
+			}
+		}
+	}
+
 	return (
-		<View style={styles.container}>
+		<ImageBackground
+			style={styles.container}
+			source={
+				song === "twinkle"
+					? require("./assets/stars.jpg")
+					: song === "bells"
+					? require("./assets/christmas.jpg")
+					: ""
+			}
+		>
 			<View
 				style={{
 					position: "relative",
@@ -47,12 +105,7 @@ export default function App() {
 			>
 				{keys.map(key => (
 					<View
-						onTouchStart={() => {
-							setColors(colors.map((c, i) => (i == key ? "#dadada" : c)));
-							setTimeout(() => {
-								playSound(key);
-							}, 1);
-						}}
+						onTouchStart={() => playKey(key)}
 						onTouchEnd={() => {
 							setColors(ogColors);
 						}}
@@ -74,12 +127,7 @@ export default function App() {
 				>
 					{sharps.map((key, i) => (
 						<View
-							onTouchStart={() => {
-								setColors(colors.map((c, i) => (i == key ? "#4e4e4e" : c)));
-								setTimeout(() => {
-									playSound(key);
-								}, 1);
-							}}
+							onTouchStart={() => playSharp(key)}
 							onTouchEnd={() => {
 								setColors(ogColors);
 							}}
@@ -97,7 +145,31 @@ export default function App() {
 					))}
 				</View>
 			</View>
-		</View>
+			<View style={{ marginLeft: 50 }}>
+				<TouchableOpacity
+					onPress={() => {
+						setSong("bells");
+						playSong(bells);
+					}}
+				>
+					<Image
+						style={{ width: 50, height: 80 }}
+						source={require("./assets/bells.png")}
+					/>
+				</TouchableOpacity>
+				<TouchableOpacity
+					onPress={() => {
+						setSong("twinkle");
+						playSong(twinkle);
+					}}
+				>
+					<Image
+						style={{ width: 50, height: 50, marginTop: 20 }}
+						source={require("./assets/twinkle.png")}
+					/>
+				</TouchableOpacity>
+			</View>
+		</ImageBackground>
 	);
 }
 
@@ -107,6 +179,7 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		alignItems: "center",
 		backgroundColor: "#F5FCFF",
-		flexDirection: "row"
+		flexDirection: "row",
+		backgroundColor: "white"
 	}
 });
