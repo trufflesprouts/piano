@@ -11,14 +11,7 @@ import { Audio } from "expo-av";
 import sources from "./assets/audio";
 import { twinkle, bells } from "./songs";
 
-const sharps = [
-	1,
-	3,
-	6,
-	8,
-	10
-	// 13, 15, 18, 20, 22
-];
+const sharps = [1, 3, 6, 8, 10];
 const keys = [...Array(sources.length).keys()].filter(k => !sharps.includes(k));
 const ogColors = [...Array(sources.length).keys()].map(a =>
 	sharps.includes(a) ? "black" : "white"
@@ -30,7 +23,7 @@ const SHARP_HEIGHT = 120;
 const SHARP_WIDTH = 38;
 
 async function playSound(key) {
-	const { sound } = await Audio.Sound.createAsync(sources[key], {
+	Audio.Sound.createAsync(sources[key], {
 		shouldPlay: true,
 		playsInSilentModeIOS: true
 	});
@@ -79,6 +72,10 @@ export default function App() {
 				setColors(ogColors);
 				await sleep(10);
 			}
+		}
+		if (playerId == currentId) {
+			playerId = 0;
+			setSong(null);
 		}
 	}
 
